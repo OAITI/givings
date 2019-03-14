@@ -95,7 +95,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                            actionButton("save", "Add Donation", icon = icon("plus-square", lib = "font-awesome"))
                        ),
                        hr(),
-                       
+                       h4(textOutput("dayTotalGiven")),
                        hr(),
                        h4("Sanity Check - Table Data"),
                        DTOutput("donationTable")
@@ -205,7 +205,7 @@ server <- function(input, output, session) {
            # If it was a joint donor, reset the checkbox and show added name
            updateCheckboxInput(session, "joint", value = FALSE)
            updateSelectizeInput(session, "donorname", 
-                                choices = sort(unique(donations()$Donor)), selected = donorname)
+                                choices = sort(unique(rbind(donations(), new_donation)$Donor)), selected = donorname)
            
        }
 
@@ -227,10 +227,15 @@ server <- function(input, output, session) {
            updateSelectInput(session, "initiative", choices = "")
        }
    })
-   # observe({
-   #     updateSelectInput(session, "donorname", choices = sort(unique(donations()$Donor)))
-   #     updateSelectInput(session, "donor2name", choices = sort(unique(donations()$Donor)))
-   # })
+   
+   output$dayTotalGiven <- renderText({ 
+       if (nrow(donations()) == 0) return(NULL)
+
+      dayTotal <- donations() %>%
+           filter(Date == input$date, Donor == input$donorname) %>% 
+           summarise(sum(Amount))
+       paste0("Day Total: $", dayTotal)
+   })
    
    observe({
        updateDateRangeInput(session, "daterange1", start = min(donations()$Date), end = max(donations()$Date))
@@ -248,7 +253,7 @@ server <- function(input, output, session) {
        d1 <- as.Date(format(input$daterange1[1]))
        d2 <- as.Date(format(input$daterange1[2]))
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2) %>% #TODO:Check =
+           filter(Date >= d1 & Date <= d2) %>% 
            summarise(sum(Amount))
        paste0("Total Funds: $", total )
    })
@@ -308,7 +313,7 @@ server <- function(input, output, session) {
        d2 <- as.Date(format(input$daterange2[2]))
        acc <- input$acc_report
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>% #TODO:Check =
+           filter(Date >= d1 & Date <= d2, Account == acc) %>% 
            summarise(sum(Amount))
        paste0("Total Amount in ", acc, ": $", total )
    })
@@ -427,7 +432,7 @@ server <- function(input, output, session) {
        d2 <- as.Date(format(input$daterange3[2]))
        donor <- input$donorname_report
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Donor == donor) %>% #TODO:Check =
+           filter(Date >= d1 & Date <= d2, Donor == donor) %>% 
            summarise(sum(Amount))
        paste0("Total Given by ", donor, ": $", total)
    })
