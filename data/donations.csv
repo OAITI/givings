@@ -1,26 +1,26 @@
 Date,Donor,Type,DonorID,Account,Initiative,Amount
-2018-12-30T00:00:00Z,Rob and Sandra Gibbons,Check,1,Tithe,NA,1900
-2019-01-20T00:00:00Z,Jamie Williamson,Check,2,Tithe,NA,844.23
-2019-02-05T00:00:00Z,Rob and Sandra Gibbons,Check,1,Tithe,NA,1320
+2018-12-30T00:00:00Z,Rob and Sandra Gibbons,Check,1,Building Fund,NA,1900
+2019-01-20T00:00:00Z,Jamie Williamson,Check,2,Missions,NA,844.23
+2019-02-05T00:00:00Z,Rob and Sandra Gibbons,Check,1,Church Budget,NA,1320
 2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Tithe,NA,96
 2019-02-23T00:00:00Z,Perstephonie,Cash,4,Tithe,NA,260
-2019-02-23T00:00:00Z,Jamie Williamson,Check,2,Tithe,NA,388.11
-2019-03-01T00:00:00Z,Rob and Sandra Gibbons,Check,1,Tithe,NA,2268
+2019-02-23T00:00:00Z,Jamie Williamson,Check,2,Church Budget,NA,388.11
+2019-03-01T00:00:00Z,Rob and Sandra Gibbons,Check,1,Conference Evangelism,NA,2268
 2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Tithe,NA,570
 2019-03-02T00:00:00Z,Yvonne,Cash,5,Tithe,NA,585
 2019-03-02T00:00:00Z,Perstephonie,Cash,4,Tithe,NA,100
-2019-03-02T00:00:00Z,Rob Gibbens,Check,7,Tithe,NA,536
-2019-03-02T00:00:00Z,Sandra Gibbens,Check,8,Tithe,NA,435
-2019-03-02T00:00:00Z,Sandra Gibbens,Check,8,Tithe,NA,43.2
+2019-03-02T00:00:00Z,Rob Gibbons,Check,7,Tithe,NA,536
+2019-03-02T00:00:00Z,Sandra Gibbons,Check,8,Tithe,NA,435
+2019-03-02T00:00:00Z,Sandra Gibbons,Check,8,Tithe,NA,43.2
 2019-03-02T00:00:00Z,Pat Riley,Check,9,Tithe,NA,250
 2019-02-23T00:00:00Z,Jamie Williamson,Check,2,Offering,NA,20
 2019-03-02T00:00:00Z,Church Congregation,Cash,6,Loose Offering,NA,114
 2019-03-02T00:00:00Z,Perstephonie,Cash,4,Church Development,NA,100
-2019-02-05T00:00:00Z,Rob and Sandra Gibbons,Check,1,Sidewalk,NA,40
-2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Sidewalk,NA,10
-2019-02-23T00:00:00Z,Perstephonie,Cash,4,Sidewalk,NA,400
-2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Sidewalk,NA,30
-2019-03-02T00:00:00Z,Church Congregation,Cash,6,Sidewalk,NA,13.15
+2019-02-05T00:00:00Z,Rob and Sandra Gibbons,Check,1,Building Fund,Sidewalk,40
+2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Building Fund,Sidewalk,10
+2019-02-23T00:00:00Z,Perstephonie,Cash,4,Building Fund,Sidewalk,400
+2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Building Fund,Sidewalk,30
+2019-03-02T00:00:00Z,Church Congregation,Cash,6,Building Fund,Sidewalk,13.15
 2019-01-20T00:00:00Z,Jamie Williamson,Check,2,Church Expense,NA,60
 2019-02-05T00:00:00Z,Rob and Sandra Gibbons,Check,1,Church Expense,NA,200
 2019-03-01T00:00:00Z,Rob and Sandra Gibbons,Check,1,Church Expense,NA,100
@@ -34,16 +34,9 @@ Date,Donor,Type,DonorID,Account,Initiative,Amount
 2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Missions,NA,14
 2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Van Ministry,NA,10
 2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Van Ministry,NA,30
-2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Radio,NA,4
-2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Radio,NA,6
-2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Conference Evangilism,NA,10
-2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Conference Evangilism,NA,30
-2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Local Evangilism,NA,15
-2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Local Evangilism,NA,30
-2019-03-13T00:00:00Z,Church Congregation,Cash,6,Local Evangilism,test,1
-2019-03-13T00:00:00Z,Jamie Williamson,Cash,2,Local Evangilism,test,1
-2019-03-13T00:00:00Z,Mona and Germin Qudans,Cash,3,Church Expense,test,1
-2019-03-14T00:00:00Z,Jamie Williamson,Cash,2,Conference Evangilism,testagain,100
-2019-03-14T00:00:00Z,Jamie Williamson,Cash,2,Local Community Services,test3,101
-2019-03-14T00:00:00Z,Rob and Sandra Gibbons and Addy Gibbons,Cash,10,Local Community Services,test3,101
-2019-03-14T00:00:00Z,Addy Gibbons,Cash,11,Local Community Services,test3,101
+2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Church Expense,Radio,4
+2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Church Expense,Radio,6
+2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Conference Evangelism,NA,10
+2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Conference Evangelism,NA,30
+2019-02-22T00:00:00Z,Mona and Germin Qudans,Check,3,Local Evangelism,NA,15
+2019-03-01T00:00:00Z,Mona and Germin Qudans,Check,3,Local Evangelism,NA,30

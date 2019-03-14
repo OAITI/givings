@@ -202,6 +202,11 @@ server <- function(input, output, session) {
            new_donation <- tibble(Date = date, DonorID = donorID, Type = type, Account = account,
                                       Initiative = initiative, Amount = amount, Donor = donorname)
            write_csv(rbind(donations(), new_donation), "data/donations.csv")
+           # If it was a joint donor, reset the checkbox and show added name
+           updateCheckboxInput(session, "joint", value = FALSE)
+           updateSelectizeInput(session, "donorname", 
+                                choices = sort(unique(donations()$Donor)), selected = donorname)
+           
        }
 
    })
