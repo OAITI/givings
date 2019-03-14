@@ -496,7 +496,7 @@ server <- function(input, output, session) {
          donations_wide <- donations() %>%
              dplyr::rename(Family = Donor) %>%
              mutate(Account = ifelse(is.na(Initiative), Account, paste0(Account, "_", Initiative))) %>%
-             group_by(Date, Family, Type, Account, Initiative) %>%
+             group_by(Date, Family, Type, Account) %>%
              summarise(Amount = sum(Amount)) %>%
             # unite(col = "Account", Account, Initiative, sep = "_") %>%
              spread(key = Account, value = Amount, fill = 0) 
