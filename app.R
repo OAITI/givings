@@ -37,7 +37,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
          
          h4("Import"),
          
-         HTML("You can import your own data. The data must be in a suitable structure described here. 
+         HTML("You can import your own data. The data must be in a suitable structure described <a href = 'https://github.com/OAITI/givings'>here</a>. 
               <b>Warning: Uploading your own data will replace all existing data in the app!</b>"),
          
          br(), br(),
