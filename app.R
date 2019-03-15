@@ -494,7 +494,7 @@ server <- function(input, output, session) {
    ## Export routine
    output$export <- downloadHandler(
      filename = function() {
-         if (tools::file_ext(input$import$datapath) == "csv") {
+         if (!is.null(input$import$datapath) && tools::file_ext(input$import$datapath) == "csv") {
              paste('donations-', Sys.Date(), '.csv', sep='')
          } else {
              paste('donations-', Sys.Date(), '.xlsx', sep='')
@@ -511,7 +511,7 @@ server <- function(input, output, session) {
              spread(key = Account, value = Amount, fill = 0) 
          rowsums <- rowSums(donations_wide[,setdiff(names(donations_wide), c("Initiative", "Date","Family","Type","Total"))], na.rm = TRUE)
          donations_wide$Total <- rowsums
-         if (tools::file_ext(input$import$datapath) == "csv") {
+         if (!is.null(input$import$datapath) && tools::file_ext(input$import$datapath) == "csv") {
              write_csv(donations_wide, con)
          } else {
              writexl::write_xlsx(donations_wide, con) 
