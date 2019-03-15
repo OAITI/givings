@@ -4,8 +4,10 @@ library(tidyverse)
 library(lubridate)
 library(DT)
 library(readxl)
+library(writexl)
 
-donations <- try(read_csv("data/donations.csv"))
+donations <- try(read_csv("data/donations.csv") %>%
+                     mutate(Date = as_date(Date)))
 if (inherits(donations, "try-error")) {
     donations <- tibble(Date = ymd(), DonorID = numeric(),
                                                       Type = character(), Account = character(),
@@ -97,8 +99,8 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                        hr(),
                        h4(textOutput("dayTotalGiven")),
                        hr(),
-                       h4("Sanity Check - Table Data"),
-                       DTOutput("donationTable")
+                       h4("Sanity Check - Entry Data"),
+                       DTOutput("donationTable", height = "30%")
                        
                        ),
               tabPanel(title = "Church Dashboard",
@@ -488,13 +490,17 @@ server <- function(input, output, session) {
    # TODO: Remove this-only to check if tables are populating right!
    output$donationTable <- renderDT({
        donations() %>%
-           tail(3)
-   }, editable = TRUE, rownames = FALSE)
+           arrange(desc(Date))
+   }, rownames = FALSE)
    
    ## Export routine
    output$export <- downloadHandler(
      filename = function() {
-       paste('donations-', Sys.Date(), '.csv', sep='')
+         if (tools::file_ext(input$import$datapath) == "csv") {
+             paste('donations-', Sys.Date(), '.csv', sep='')
+         } else {
+             paste('donations-', Sys.Date(), '.xlsx', sep='')
+         }
      },
      content = function(con) {
          # Make format wide
@@ -507,8 +513,12 @@ server <- function(input, output, session) {
              spread(key = Account, value = Amount, fill = 0) 
          rowsums <- rowSums(donations_wide[,setdiff(names(donations_wide), c("Initiative", "Date","Family","Type","Total"))], na.rm = TRUE)
          donations_wide$Total <- rowsums
-         
-       write_csv(donations_wide, con)
+         if (tools::file_ext(input$import$datapath) == "csv") {
+             write_csv(donations_wide, con)
+         } else {
+             writexl::write_xlsx(donations_wide, con) 
+         }
+       
      }
    )
    
@@ -518,7 +528,7 @@ server <- function(input, output, session) {
        
        if (!is.null(inFile)) {
            if (tools::file_ext(inFile$datapath) == "csv") {
-               import_data <- read.csv(inFile$datapath) 
+               import_data <- read_csv(inFile$datapath) 
            } else {
                import_data <- read_excel(inFile$datapath)
            }
@@ -536,6 +546,8 @@ server <- function(input, output, session) {
                    filter(Amount > 0) %>%
                    separate(col = "Account", into = c("Account", "Initiative"), sep = "_", extra = "merge")
            }
+           x <- x %>%
+               mutate(Date = as_date(Date))
            
            write_csv(x, "data/donations.csv")
        }
