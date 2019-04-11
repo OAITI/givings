@@ -99,7 +99,7 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                        hr(),
                        h4(textOutput("dayTotalGiven")),
                        hr(),
-                       h4("Sanity Check - Entry Data"),
+                       h4("Sanity Check - Entered Data"),
                        DTOutput("donationTable", height = "30%")
                        
                        ),
@@ -112,7 +112,10 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                        h4(textOutput("totalGiven")),
                        br(), br(),
                        plotOutput("accDist"), br(),
-                       plotOutput("donorDist")
+                       plotOutput("donorDist"),
+                       br(),
+                       hr(),
+                       DTOutput("churchTable", height = "30%")
                        ),
               tabPanel(title = "Account Dashboard",
                        wellPanel(
@@ -128,7 +131,10 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                        br(),
                        plotOutput("accdonorDist"),
                        br(),
-                       plotOutput("accinitDist")
+                       plotOutput("accinitDist"),
+                       br(),
+                       hr(),
+                       DTOutput("accTable", height = "30%")
               ),
               tabPanel(title = "Individuals Dashboard",
                        wellPanel(
@@ -142,7 +148,10 @@ ui <- fluidPage(theme = shinytheme("cerulean"),
                        br(), br(),
                        plotOutput("donortimePlot"),
                        br(),
-                       plotOutput("donoraccDist")
+                       plotOutput("donoraccDist"),
+                       br(),
+                       hr(),
+                       DTOutput("indivTable", height = "30%")
               )
               
           )
@@ -247,13 +256,18 @@ server <- function(input, output, session) {
    ## DATE BASED PLOTS - CHURCH DASHBOARD
    #####################
    
+   d11 <- reactive({
+       as.Date(format(input$daterange1[1]))
+   })
+   d21 <- reactive({
+       as.Date(format(input$daterange1[2]))
+   })
+   
    output$totalGiven <- renderText({ 
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange1[1]))
-       d2 <- as.Date(format(input$daterange1[2]))
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2) %>% 
+           filter(Date >= d11() & Date <= d21()) %>% 
            summarise(sum(Amount))
        paste0("Total Funds: $", total )
    })
@@ -261,10 +275,8 @@ server <- function(input, output, session) {
    output$accDist <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange1[1]))
-       d2 <- as.Date(format(input$daterange1[2]))
        sum_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2) %>%
+           filter(Date >= d11(), Date <= d21()) %>%
            group_by(Account) %>%
            summarise(Total = sum(Amount)) %>%
            arrange(desc(Total)) %>%
@@ -274,17 +286,16 @@ server <- function(input, output, session) {
            geom_bar(stat = "identity") +
            theme_minimal() +
            scale_y_continuous(labels = scales::dollar) +
-           labs(title = "List of Accounts in order of Funds") +
+           labs(title = "List of Accounts in order of Funds",
+                subtitle = paste0("From ", d11(), " to ", d21())) +
            coord_flip()
    })
    
    output$donorDist <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange1[1]))
-       d2 <- as.Date(format(input$daterange1[2]))
        sum_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2) %>%
+           filter(Date >= d11() & Date <= d21()) %>%
            group_by(Donor) %>%
            summarise(Total = sum(Amount)) %>%
            arrange(desc(Total)) %>%
@@ -294,9 +305,17 @@ server <- function(input, output, session) {
            geom_bar(stat = "identity") +
            theme_minimal() +
            scale_y_continuous(labels = scales::dollar) +
-           labs(title = "List of Donors in order of Donation Amounts") +
+           labs(title = "List of Donors in order of Donation Amounts", 
+                subtitle = paste0("From ", d11(), " to ", d21())) +
            coord_flip()
    })
+   
+   output$churchTable <- renderDT({
+       donations() %>%
+           filter(Date >= d11(), Date <= d21()) %>%
+           arrange(desc(Date)) %>%
+           datatable(caption = paste0("Donations to the Church From ", d11(), " to ", d21()))
+   }, rownames = FALSE)
    
    #####################
    ## ACCOUNT BASED PLOTS - ACC DASHBOARD
@@ -305,29 +324,33 @@ server <- function(input, output, session) {
    observe({
        updateSelectInput(session, "acc_report", choices = sort(unique(donations()$Account)))
    })
+
+   d12 <- reactive({
+       as.Date(format(input$daterange2[1]))
+   })
+   d22 <- reactive({
+       as.Date(format(input$daterange2[2]))
+   })
    
+   acc <- reactive({ 
+       input$acc_report
+   })
    output$acctotalGiven <- renderText({ 
        if (nrow(donations()) == 0) return(NULL)
-       
-       d1 <- as.Date(format(input$daterange2[1]))
-       d2 <- as.Date(format(input$daterange2[2]))
-       acc <- input$acc_report
+    
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>% 
+           filter(Date >= d12() & Date <= d22(), Account == acc()) %>% 
            summarise(sum(Amount))
-       paste0("Total Amount in ", acc, ": $", total )
+       paste0("Total Amount in ", acc(), ": $", total )
    })
    
    output$acctimePlot <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange2[1]))
-       d2 <- as.Date(format(input$daterange2[2]))
-       acc <- input$acc_report
-       all_dates <- tibble(Date = seq.Date(round_date(d1, unit = "week"), round_date(d2, unit = "week"),
+       all_dates <- tibble(Date = seq.Date(round_date(d12(), unit = "week"), round_date(d22(), unit = "week"),
                                            by = "weeks"))
        weekly_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>%
+           filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
            mutate(Week = as.Date(round_date(Date, unit = "week"))) %>%
            right_join(all_dates, by = c("Week" = "Date")) %>%
            replace_na(list(Amount = 0)) %>%
@@ -337,21 +360,20 @@ server <- function(input, output, session) {
        ggplot(weekly_donations, aes(x = Week, y = `Weekly Amount`)) +
            geom_line() +
            theme_minimal() +
-           scale_y_continuous(limits = c(0, max(weekly_donations$`Weekly Amount`)), 
+           scale_y_continuous(#limits = c(0, max(weekly_donations$`Weekly Amount`)+5), 
                               breaks = scales::pretty_breaks(n = 10), labels = scales::dollar) +
-           scale_x_date(date_labels = "%b %d", date_breaks = "1 week", limits = c(min(weekly_donations$`Week`), max(weekly_donations$`Week`))) +
-           labs(title = paste0("Account Giving over Time for ", acc), x = "Date", y = "Weekly Amount")
+           scale_x_date(date_labels = "%b %d", date_breaks = "1 week") +
+           labs(title = paste0("Account Giving over Time for ", acc()),
+                subtitle = paste0("From ", d12(), " to ", d22()),
+                x = "Date", y = "Weekly Amount")
    })
    output$uniqueDonors <- renderPlot({ 
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange2[1]))
-       d2 <- as.Date(format(input$daterange2[2]))
-       acc <- input$acc_report
-       all_dates <- tibble(Date = seq.Date(round_date(d1, unit = "week"), round_date(d2, unit = "week"),
+       all_dates <- tibble(Date = seq.Date(round_date(d12(), unit = "week"), round_date(d22(), unit = "week"),
                                            by = "weeks"))
        unique_donors <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>%
+           filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
            mutate(Week = as.Date(round_date(Date, unit = "week"))) %>%
            group_by(Week) %>%
            summarise(Number = length(unique(Donor))) %>%
@@ -360,22 +382,18 @@ server <- function(input, output, session) {
        ggplot(unique_donors, aes(x = Week, y = Number)) +
            geom_line() +
            theme_minimal() +
-           scale_y_continuous(limits = c(0, max(unique_donors$Number)), 
+           scale_y_continuous(#limits = c(0, max(unique_donors$Number)), 
                               breaks = scales::pretty_breaks(n = max(unique_donors$Number)), labels = scales::comma) +
-           scale_x_date(date_labels = "%b %d", date_breaks = "1 week", 
-                        limits = c(min(unique_donors$`Week`), max(unique_donors$`Week`))) +
-           labs(title = paste0("Unique Donors over Time for ", acc), x = "Date", y = "Weekly Donors")
+           scale_x_date(date_labels = "%b %d", date_breaks = "1 week") +
+           labs(title = paste0("Unique Donors over Time for ", acc()), 
+                subtitle = paste0("From ", d12(), " to ", d22()), x = "Date", y = "Weekly Donors")
    })
    
    output$accdonorDist <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange2[1]))
-       d2 <- as.Date(format(input$daterange2[2]))
-       acc <- input$acc_report
-       
        sum_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>%
+           filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
            group_by(Donor) %>%
            summarise(Total = sum(Amount)) %>%
            arrange(desc(Total)) %>%
@@ -385,24 +403,21 @@ server <- function(input, output, session) {
            geom_bar(stat = "identity") +
            theme_minimal() +
            scale_y_continuous(labels = scales::dollar) +
-           labs(title = paste0("Donors Giving to ", acc)) +
+           labs(title = paste0("Donors Giving to ", acc()), 
+                subtitle = paste0("From ", d12(), " to ", d22())) +
            coord_flip()
    })
    
    output$accinitDist <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange2[1]))
-       d2 <- as.Date(format(input$daterange2[2]))
-       acc <- input$acc_report
-       
        initiatives_present <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Account == acc) %>%
+           filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
            .$Initiative
        
        if(sum(!is.na(initiatives_present)) > 0) {
            sum_donations <- donations() %>%
-               filter(Date >= d1 & Date <= d2, Account == acc) %>%
+               filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
                group_by(Initiative) %>%
                summarise(Total = sum(Amount)) %>%
                arrange(desc(Total)) %>%
@@ -412,10 +427,17 @@ server <- function(input, output, session) {
                geom_bar(stat = "identity") +
                theme_minimal() +
                scale_y_continuous(labels = scales::dollar) +
-               labs(title = paste0("Initiatives Under ", acc)) +
+               labs(title = paste0("Initiatives Under ", acc()), subtitle = paste0("From ", d12(), " to ", d22())) +
                coord_flip()
        }
    })
+   
+   output$accTable <- renderDT({
+       donations() %>%
+           filter(Date >= d12(), Date <= d22(), Account == acc()) %>%
+           arrange(desc(Date)) %>%
+           datatable(caption = paste0("Donations to ", acc()," From ", d12(), " to ", d22()))
+   }, rownames = FALSE)
    
    #####################
    ## INDIVIDUAL BASED PLOTS - INDIVIDUAL DASHBOARD
@@ -424,29 +446,32 @@ server <- function(input, output, session) {
    observe({
        updateSelectInput(session, "donorname_report", choices = sort(unique(donations()$Donor)))
    })
+   d13 <- reactive({
+       as.Date(format(input$daterange3[1]))
+   })
+   d23 <- reactive({
+       as.Date(format(input$daterange3[2]))
+   })
+   donor <- reactive({
+       input$donorname_report
+   })
    
    output$donortotalGiven <- renderText({ 
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange3[1]))
-       d2 <- as.Date(format(input$daterange3[2]))
-       donor <- input$donorname_report
        total <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Donor == donor) %>% 
+           filter(Date >= d13() & Date <= d23(), Donor == donor()) %>% 
            summarise(sum(Amount))
-       paste0("Total Given by ", donor, ": $", total)
+       paste0("Total Given by ", donor(), ": $", total)
    })
    
    output$donortimePlot <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
        
-       d1 <- as.Date(format(input$daterange3[1]))
-       d2 <- as.Date(format(input$daterange3[2]))
-       donor <- input$donorname_report
-       all_dates <- tibble(Date = seq.Date(round_date(d1, unit = "week"), round_date(d2, unit = "week"),
+       all_dates <- tibble(Date = seq.Date(round_date(d13(), unit = "week"), round_date(d23(), unit = "week"),
                                            by = "weeks"))
        weekly_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Donor == donor) %>%
+           filter(Date >= d13(), Date <= d23(), Donor == donor()) %>%
            mutate(Week = as.Date(round_date(Date, unit = "week"))) %>%
            right_join(all_dates, by = c("Week" = "Date")) %>%
            replace_na(list(Amount = 0)) %>%
@@ -456,20 +481,17 @@ server <- function(input, output, session) {
        ggplot(weekly_donations, aes(x = Week, y = `Weekly Amount`)) +
            geom_line() +
            theme_minimal() +
-           scale_y_continuous(limits = c(0, max(weekly_donations$`Weekly Amount`)), 
+           scale_y_continuous(#limits = c(0, max(weekly_donations$`Weekly Amount`)+5), 
                               breaks = scales::pretty_breaks(n = 10), labels = scales::dollar) +
-           scale_x_date(date_labels = "%b %d", date_breaks = "1 week", limits = c(min(weekly_donations$`Week`), max(weekly_donations$`Week`))) +
-           labs(title = paste0(donor, "'s Giving over Time"), x = "Date", y = "Weekly Amount")
+           scale_x_date(date_labels = "%b %d", date_breaks = "1 week") +
+           labs(title = paste0(donor(), "'s Giving"), 
+                subtitle = paste0("From ", d13(), " to ", d23()),  x = "Date", y = "Weekly Amount")
    })
    output$donoraccDist <- renderPlot({
        if (nrow(donations()) == 0) return(NULL)
-       
-       d1 <- as.Date(format(input$daterange3[1]))
-       d2 <- as.Date(format(input$daterange3[2]))
-       donor <- input$donorname_report
-       
+
        sum_donations <- donations() %>%
-           filter(Date >= d1 & Date <= d2, Donor == donor) %>%
+           filter(Date >= d13(), Date <= d23(), Donor == donor()) %>%
            group_by(Account) %>%
            summarise(Total = sum(Amount)) %>%
            arrange(desc(Total)) %>%
@@ -479,11 +501,18 @@ server <- function(input, output, session) {
            geom_bar(stat = "identity") +
            theme_minimal() +
            scale_y_continuous(labels = scales::dollar) +
-           labs(title = "Favorite Accounts") +
+           labs(title = paste0(donor(), "'s Favorite Accounts"),
+                subtitle = paste0("From ", d13(), " to ", d23())) +
            coord_flip()
    })
    
-   
+   output$indivTable <- renderDT({
+       donations() %>%
+           filter(Date >= d13(), Date <= d23(), Donor == donor()) %>%
+           arrange(desc(Date)) %>%
+           datatable(caption = paste0(donor(), "'s Giving From ", d13(), " to ", d23()))
+   }, 
+   rownames = FALSE)
    
    # TODO: Remove this-only to check if tables are populating right!
    output$donationTable <- renderDT({
